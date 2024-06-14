@@ -7,7 +7,7 @@
     </div>
     <div class="section-body">
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-lg-8 offset-lg-2">
                 <div class="card">
                     <div class="card-body">
                         <!--label class="text-danger">Los campos con * son obligatorios</label-->

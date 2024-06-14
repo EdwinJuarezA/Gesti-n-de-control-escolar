@@ -5,6 +5,8 @@
     <div class="section-header">
         <h3 class="page__heading">Toma de asistencia</h3>
     </div>
+    <!-- Mensaje de aviso -->
+    <div id="mensaje" class="alert d-none"></div>
     <div class="section-body">
         <div class="row">
             <div class="col-12">
@@ -29,36 +31,37 @@
 
 <!-- Modal para la asistencia -->
 <div class="modal fade" id="asistenciaModal" tabindex="-1" aria-labelledby="asistenciaModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="asistenciaModalLabel">Confirmar Asistencia</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="asistenciaForm">
-                        <div>
-                            <span class="textoG">Alumno:</span><span id="alumno"><span>
-                        </div>
-                        @csrf
-                        <input type="hidden" id="matricula" name="matricula">
-                        <div class="mb-3">
-                            <label for="ciclo_id" class="form-label textoG">Ciclo: </label>
-                            <select id="ciclo_id" name="ciclo_id" class="form-select" required>
-                                @foreach($ciclos as $ciclo)
-                                    <option class="textoG" value="{{ $ciclo->id }}">{{ $ciclo->nombre }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Confirmar Asistencia</button>
-                    </form>
-                </div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="asistenciaModalLabel" style="font-size: 20px;">Confirmar Asistencia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="font-size: 20px;">
+                <form id="asistenciaForm">
+                    <div>
+                        <span class="textoG">Alumno: </span><span id="alumno"></span>
+                    </div>
+                    <div>
+                        <span class="textoG">Matrícula: </span><span id="alumnoMatricula"></span>
+                    </div>
+                    @csrf
+                    <input type="hidden" id="matricula" name="matricula">
+                    <div class="mb-3">
+                        <label for="ciclo_id" class="form-label textoG">Ciclo: </label>
+                        <select id="ciclo_id" name="ciclo_id" class="form-select" required>
+                            @foreach($ciclos as $ciclo)
+                                <option class="textoG" value="{{ $ciclo->id }}">{{ $ciclo->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Confirmar Asistencia</button>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Mensaje de aviso -->
-    <div id="mensaje" class="alert d-none"></div>
 @endsection
 
 @section('scripts')
@@ -98,12 +101,18 @@
 
                     // Poner el valor del QR en el campo de la matrícula
                     document.getElementById('matricula').value = code.data;
-                    var text = document.createTextNode(code.data);
-                    var text1 = document.createTextNode('');
-                    document.getElementById('resultado').innerHTML = '<p id="vEscan" class="textoG">'+code.data+'</p>';
-                    var a= document.getElementById('alumno');
-                    a.appendChild(text1);
-                    a.appendChild(text);
+
+                    // Aquí se debería hacer una llamada AJAX para obtener el nombre del alumno con la matrícula escaneada.
+                    fetch(`/buscar-alumno/${code.data}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById('alumno').innerText = data.nombre + ' ' + data.apellido;
+                            document.getElementById('alumnoMatricula').innerText = data.matricula;
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+
                     // Mostrar el modal
                     $('#asistenciaModal').modal('show');
                 }

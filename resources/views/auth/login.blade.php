@@ -47,7 +47,7 @@
                             </div>
                             <div class="d-flex justify-content-center align-items-center">
                                 <a href="{{ route('password.request') }}" class="text-small" style="font-size: 18px;">
-                                    Forgot Password?
+                                    ¿Has olvidado tu contraseña?
                                 </a>
                             </div>
                         </div>
@@ -56,13 +56,13 @@
                             <div class="custom-control custom-checkbox">
                                 <input type="checkbox" name="remember" class="custom-control-input" tabindex="3"
                                     id="remember"{{ (Cookie::get('remember') !== null) ? 'checked' : '' }}>
-                                <label class="custom-control-label" for="remember" style="font-size: 16px;">Remember Me</label>
+                                <label class="custom-control-label" for="remember" style="font-size: 16px;">Recuerdame</label>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-cambio btn-lg btn-block" tabindex="4" style="background-color: orange; color: white">
-                                Iniciar Sesión
+                                <span style="font-size: 30px">Iniciar Sesión</span>
                             </button>
                         </div>
                     </form>

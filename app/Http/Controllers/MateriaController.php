@@ -49,19 +49,15 @@ class MateriaController extends Controller
     public function store(Request $request)
     {
         request()->validate([
-        'clave_curso' => 'required|regex:/^[a-zA-Z0-9-]+$/|unique:materias',
-        'nombre' => 'required|regex:/^[a-zA-ZáéíóúÁÉÍÓÚñ\s]+$/u',
-        'semestre' => 'required|numeric|between:1,6',
-        'creditos' => 'required|numeric|between:1,10',
+            'clave_curso' => 'required|regex:/^[a-zA-Z0-9-]+$/|unique:materias,clave_curso',
+            'nombre' => 'required|regex:/^[a-zA-ZáéíóúÁÉÍÓÚñ\s]+$/u|unique:materias,nombre',
+            'semestre' => 'required|numeric|between:1,6',
+            'creditos' => 'required|numeric|between:1,6',
         ]);
-
-        $materia = Materia::create($request->all());
-
-        /*Grupo_Materia::create([
-            'materia_id' => $materia->id
-        ]);*/
-
-        return redirect()->route('materias.index');
+    
+        Materia::create($request->all());
+    
+        return redirect()->route('materias.index')->with('success', 'Materia creada correctamente.');
     }
 
     /**
@@ -95,17 +91,16 @@ class MateriaController extends Controller
      */
     public function update(Request $request, Materia $materia)
     {
-
         $this->validate($request, [
-        'clave_curso' => 'required|regex:/^[a-zA-Z0-9-]+$/|unique:materias,clave_curso,'.$materia->id,
-        'nombre' => 'required|regex:/^[a-zA-ZáéíóúÁÉÍÓÚ\s]+$/u',
-        'semestre' => 'required|numeric|between:1,6',
-        'creditos' => 'required|numeric|between:1,10',
+            'clave_curso' => 'required|regex:/^[a-zA-Z0-9-]+$/|unique:materias,clave_curso,'.$materia->id,
+            'nombre' => 'required|regex:/^[a-zA-ZáéíóúÁÉÍÓÚñ\s]+$/u|unique:materias,nombre,'.$materia->id,
+            'semestre' => 'required|numeric|between:1,6',
+            'creditos' => 'required|numeric|between:1,6',
         ]);
-
+    
         $materia->update($request->all());
-
-        return redirect()->route('materias.index');
+    
+        return redirect()->route('materias.index')->with('success', 'Materia actualizada correctamente.');
     }
 
     /**

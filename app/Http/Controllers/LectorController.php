@@ -8,6 +8,7 @@ use App\Models\QRCode as QRCodeModel;
 use App\Models\Alumno;
 use App\Models\Ciclo;
 use App\Models\Asistencia;
+use App\Models\Grupo;
 use Carbon\Carbon;
 
 class LectorController extends Controller
@@ -193,5 +194,19 @@ class LectorController extends Controller
         return redirect()->route('alumnos.index');
     }
 
+    public function obtenerAlumnoPorMatricula($matricula)
+    {
+        $alumno = Alumno::where('matricula', $matricula)->first();
+
+        if (!$alumno) {
+            return response()->json(['error' => 'Alumno no encontrado'], 404);
+        }
+
+        return response()->json([
+            'nombre' => $alumno->nombre,
+            'apellido' => $alumno->apellido,
+            'matricula' => $alumno->matricula,
+        ]);
+    }
 
 }

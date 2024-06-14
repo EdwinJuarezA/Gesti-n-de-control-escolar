@@ -57,8 +57,8 @@ class DocumentoController extends Controller
         $resultados = Calificacion::where('alumno_id', $alumno->id)
             ->with('materia')
             ->get();
-
+    
         $pdf = PDF::loadView('documentos.pdf', compact('alumno', 'grupo', 'resultados'));
         return $pdf->download('boleta_calificaciones.pdf');
-    }
+    }    
 }

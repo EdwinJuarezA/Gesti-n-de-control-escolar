@@ -122,8 +122,20 @@ class CalificacionController extends Controller
         $grupo = $request->input('grupo');
         $materia = $request->input('materia');
     
-        $query = Calificacion::query()
-            ->join('grupo_materias', 'grupo_materias.id', '=', 'calificaciones.asignar_id')
+        // Obtener el grupo-materia para acceder al estatus y al profesor
+        $grupoMateria = Grupo_Materia::with(['grupo', 'materia', 'profesor'])
+            ->whereHas('grupo', function ($query) use ($grupo) {
+                $query->where('nombre', $grupo);
+            })->whereHas('materia', function ($query) use ($materia) {
+                $query->where('nombre', $materia);
+            })->first();
+    
+        // Si no se encuentra el grupo-materia, redirigir con un error
+        if (!$grupoMateria) {
+            return redirect()->back()->with('error', 'No se encontró el grupo-materia especificado.');
+        }
+    
+        $calificaciones = Calificacion::join('grupo_materias', 'grupo_materias.id', '=', 'calificaciones.asignar_id')
             ->join('grupos', 'grupos.id', '=', 'grupo_materias.grupo_id')
             ->join('materias', 'materias.id', '=', 'grupo_materias.materia_id')
             ->join('alumnos', 'alumnos.id', '=', 'calificaciones.alumno_id')
@@ -131,31 +143,41 @@ class CalificacionController extends Controller
                 'calificaciones.id',
                 'grupos.nombre as grupo',
                 'materias.nombre as materia',
-                DB::raw('CONCAT(alumnos.nombre, " ",alumnos.apellido) as alumno'),
+                DB::raw('CONCAT(alumnos.nombre, " ", alumnos.apellido) as alumno'),
                 'calificaciones.parcial1',
                 'calificaciones.parcial2',
                 'calificaciones.parcial3',
-                'calificaciones.final'
-            );
+                'calificaciones.final',
+                'grupo_materias.estatus'
+            )
+            ->where('grupos.nombre', $grupo)
+            ->where('materias.nombre', $materia)
+            ->paginate(10);
     
-        if ($grupo && $materia) {
-            $query->where('grupos.nombre', $grupo)
-                    ->where('materias.nombre', $materia);
-        }
+        return view('calificaciones.index', compact('calificaciones', 'grupo', 'materia', 'grupoMateria'));
+    }    
     
-        $calificaciones = $query->paginate(10);
-    
-        return view('calificaciones.index', compact('calificaciones', 'grupo', 'materia'));
-    }
-
     public function updatePartialScore(Request $request)
     {
         $calificacion = Calificacion::find($request->id);
+        $grupoMateria = Grupo_Materia::where('id', $calificacion->asignar_id)->first();
+    
         foreach ($request->changes as $field => $value) {
             $calificacion->$field = $value;
         }
     
-        // Calcular la calificación final basada en las nuevas reglas
+        // Actualizar el estatus si se permite
+        if ($grupoMateria->estatus < 4) {
+            $grupoMateria->estatus += 1;
+            $grupoMateria->save();
+        }
+
+        if ($grupoMateria->estatus == 5) {
+            $grupoMateria->estatus = 4;
+            $grupoMateria->save();
+        }
+    
+        // Calcular la calificación final si aplicable
         if ($calificacion->parcial1 < 70 || $calificacion->parcial2 < 70 || $calificacion->parcial3 < 70) {
             $calificacion->final = 0;
         } else {
@@ -164,6 +186,19 @@ class CalificacionController extends Controller
     
         $calificacion->save();
     
-        return response()->json(['newFinal' => $calificacion->final]);
-    }    
+        return response()->json(['newFinal' => $calificacion->final, 'newStatus' => $grupoMateria->estatus]);
+    }
+    
+    public function resetStatus(Request $request)
+    {
+        $grupoMateria = Grupo_Materia::find($request->id);
+    
+        if ($request->password === '12345') {
+            $grupoMateria->estatus = 5;
+            $grupoMateria->save();
+            return response()->json(['success' => true]);
+        }
+    
+        return response()->json(['success' => false, 'message' => 'Clave de acceso incorrecta']);
+    }       
 }

@@ -109,6 +109,10 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::get('/verGrupos', [CalificacionController::class, 'getGrupoMaterias'])->name('verGrupos');
     Route::post('/actualizar-calificacion', [CalificacionController::class, 'updatePartialScore'])->name('calificaciones.updatePartialScore');
+    Route::post('/reset-status', [CalificacionController::class, 'resetStatus']);
+
+    Route::get('/buscar-alumno/{matricula}', [LectorController::class, 'obtenerAlumnoPorMatricula']);
+
 
     //rutas para boletas
     Route::get('/boletas', [DocumentoController::class, 'index'])->name('documentos.index');

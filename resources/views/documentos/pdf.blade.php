@@ -14,6 +14,8 @@
         .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         .table, .table th, .table td { border: 1px solid black; }
         .table th, .table td { padding: 10px; text-align: center; }
+        .result-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .result-table th, .result-table td { padding: 10px; text-align: left; }
         .text-success { color: green; }
         .text-danger { color: red; }
     </style>
@@ -52,8 +54,7 @@
                     <th>Primer Parcial</th>
                     <th>Segundo Parcial</th>
                     <th>Tercer Parcial</th>
-                    <th>Final</th>
-                    <th>Resultado</th>
+                    <th>Promedio</th>
                 </tr>
             </thead>
             <tbody>
@@ -63,10 +64,34 @@
                         <td class="textoG">{{ $resultado->parcial1 }}</td>
                         <td class="textoG">{{ $resultado->parcial2 }}</td>
                         <td class="textoG">{{ $resultado->parcial3 }}</td>
-                        <td class="textoG">{{ $resultado->final }}</td>
-                        <td class="{{ $resultado->final >= 70 ? 'text-success' : 'text-danger' }}">
-                            {{ $resultado->final >= 70 ? 'Aprobado' : 'Reprobado' }}
-                        </td>
+                        <td class="textoG">{{ $resultado->final != 0 ? $resultado->final : 'N/A' }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <table class="result-table">
+            <thead>
+                <tr>
+                    <th>Materia</th>
+                    <th>Estado</th>
+                    <th>Materia</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($resultados->chunk(2) as $chunk)
+                    <tr>
+                        @foreach($chunk as $resultado)
+                            <td>{{ $resultado->materia->nombre }}</td>
+                            <td class="{{ $resultado->final >= 70 ? 'text-success' : 'text-danger' }}">
+                                {{ $resultado->final >= 70 ? 'Aprobado' : 'Reprobado' }}
+                            </td>
+                        @endforeach
+                        @if($chunk->count() < 2)
+                            <td></td>
+                            <td></td>
+                        @endif
                     </tr>
                 @endforeach
             </tbody>
